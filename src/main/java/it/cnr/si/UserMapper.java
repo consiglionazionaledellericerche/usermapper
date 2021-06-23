@@ -84,7 +84,6 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
             LOGGER.error(e);
         }
 
-        token.getOtherClaims().put("preferred_username", ldapUsername);
         token.getOtherClaims().put("username_cnr", ldapUsername);
         token.getOtherClaims().put("username_spid", spidUsername);
 
