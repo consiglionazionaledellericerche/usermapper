@@ -29,3 +29,17 @@ Build and deploy your Extension
 Build a jar File of the Extension (mvn clean package) - and place the jar in /opt/jboss/keycloak/standalone/deployments/ and restart keycloak
 
 create a Mapper in keycloak admin ui and select getDisplayType given in the code
+
+---
+
+Login LDAP:
+- username_cnr: OK
+- username_spid: null
+
+Login SPID 1:
+- username_cnr: OK
+- username_spid: OK
+
+Login SPID 2:
+- username_cnr: null
+- username_spid: OK
