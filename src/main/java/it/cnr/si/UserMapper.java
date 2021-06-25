@@ -61,21 +61,17 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
 
         // ldap or spid username
         String username = userSession.getUser().getUsername().toLowerCase();
-        String ldapUsername = null;
-        String spidUsername = null;
+
         try {
 
             // spid auth
             if(isSpidUsername(username)) {
-                spidUsername = username;
                 try {
                     String codiceFiscale = username.substring(6).toUpperCase();
-                    ldapUsername = aceService.getUtenteByCodiceFiscale(codiceFiscale).getUsername().toLowerCase();
+                    username = aceService.getUtenteByCodiceFiscale(codiceFiscale).getUsername().toLowerCase();
                 } catch (Exception e) {
                     LOGGER.info("utente " + username + " spid non presente in ldap");
                 }
-            } else { // ldap auth
-                ldapUsername = username;
             }
 
             LOGGER.info(username);
@@ -84,8 +80,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
             LOGGER.error(e);
         }
 
-        token.getOtherClaims().put("username_cnr", ldapUsername);
-        token.getOtherClaims().put("username_spid", spidUsername);
+        token.getOtherClaims().put("username_cnr", username);
 
     }
 
