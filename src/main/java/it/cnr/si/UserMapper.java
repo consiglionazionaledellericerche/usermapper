@@ -1,6 +1,7 @@
 package it.cnr.si;
 
 import it.cnr.si.service.AceService;
+import it.cnr.si.service.dto.anagrafica.simpleweb.UtenteWebDto;
 import org.jboss.logging.Logger;
 import org.keycloak.models.ClientSessionContext;
 import org.keycloak.models.KeycloakSession;
@@ -61,6 +62,10 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
 
         // ldap or spid username
         String username = userSession.getUser().getUsername().toLowerCase();
+        Integer matricola = null;
+        String livello = null;
+        Boolean isCnrUser = Boolean.FALSE;
+
 
         try {
 
@@ -68,7 +73,13 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
             if(isSpidUsername(username)) {
                 try {
                     String codiceFiscale = username.substring(6).toUpperCase();
-                    username = aceService.getUtenteByCodiceFiscale(codiceFiscale).getUsername().toLowerCase();
+                    UtenteWebDto utente = aceService.getUtenteByCodiceFiscale(codiceFiscale);
+
+                    username = utente.getUsername().toLowerCase();
+                    matricola = utente.getPersona().getMatricola();
+                    livello = utente.getPersona().getLivello();
+                    isCnrUser = Boolean.TRUE;
+
                 } catch (Exception e) {
                     LOGGER.info("utente " + username + " spid non presente in ldap");
                 }
@@ -81,6 +92,9 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
         }
 
         token.getOtherClaims().put("username_cnr", username);
+        token.getOtherClaims().put("livello", livello);
+        token.getOtherClaims().put("matricola_cnr", matricola);
+        token.getOtherClaims().put("is_cnr_user", isCnrUser);
 
     }
 
