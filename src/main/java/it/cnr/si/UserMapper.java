@@ -1,7 +1,6 @@
 package it.cnr.si;
 
 import it.cnr.si.service.AceService;
-import it.cnr.si.service.dto.anagrafica.simpleweb.UtenteWebDto;
 import org.jboss.logging.Logger;
 import org.keycloak.models.ClientSessionContext;
 import org.keycloak.models.KeycloakSession;
@@ -73,11 +72,9 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
             if(isSpidUsername(username)) {
                 try {
                     String codiceFiscale = username.substring(6).toUpperCase();
-                    UtenteWebDto utente = aceService.getUtenteByCodiceFiscale(codiceFiscale);
-
-                    username = utente.getUsername().toLowerCase();
-                    matricola = utente.getPersona().getMatricola();
-                    livello = utente.getPersona().getLivello();
+                    username = aceService.getUtenteByCodiceFiscale(codiceFiscale).getUsername().toLowerCase();
+                    matricola = aceService.getUtenteByCodiceFiscale(codiceFiscale).getPersona().getMatricola();
+                    livello = aceService.getUtenteByCodiceFiscale(codiceFiscale).getPersona().getLivello();
                     isCnrUser = Boolean.TRUE;
 
                 } catch (Exception e) {
