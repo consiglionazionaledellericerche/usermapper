@@ -61,10 +61,9 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
 
         // ldap or spid username
         String username = userSession.getUser().getUsername().toLowerCase();
-        Integer matricola = null;
+        String matricola = null;
         String livello = null;
         Boolean isCnrUser = Boolean.FALSE;
-
 
         try {
 
@@ -73,15 +72,23 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
                 try {
                     String codiceFiscale = username.substring(6).toUpperCase();
                     username = aceService.getUtenteByCodiceFiscale(codiceFiscale).getUsername().toLowerCase();
-                    matricola = aceService.getUtenteByCodiceFiscale(codiceFiscale).getPersona().getMatricola();
-                    livello = aceService.getUtenteByCodiceFiscale(codiceFiscale).getPersona().getLivello();
-                    isCnrUser = Boolean.TRUE;
+                    isCnrUser = Boolean.TRUE;   // Utente cnr che entra con spid
+                } catch (Exception e) {
+                    LOGGER.info("utente " + username + " spid non presente in ldap");
+                }
+            } else {
+                isCnrUser = Boolean.TRUE;       // Utente cnr che entra con credenziali cnr
+            }
 
+            if(isCnrUser) {                     // Utente cnr che entra con credenziali cnr o spid
+                try {
+                    Integer id = aceService.getPersonaByUsername(username).getId();
+                    matricola = Integer.toString(aceService.getPersonaById(id).getMatricola());
+                    livello = aceService.getPersonaById(id).getLivello();
                 } catch (Exception e) {
                     LOGGER.info("utente " + username + " spid non presente in ldap");
                 }
             }
-
             LOGGER.info(username);
 
         } catch (Exception e) {
