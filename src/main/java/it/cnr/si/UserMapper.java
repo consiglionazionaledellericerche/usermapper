@@ -1,6 +1,7 @@
 package it.cnr.si;
 
 import it.cnr.si.service.AceService;
+import it.cnr.si.service.dto.anagrafica.letture.PersonaWebDto;
 import org.jboss.logging.Logger;
 import org.keycloak.models.ClientSessionContext;
 import org.keycloak.models.KeycloakSession;
@@ -85,6 +86,10 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
                     Integer id = aceService.getPersonaByUsername(username).getId();
                     matricola = Integer.toString(aceService.getPersonaById(id).getMatricola());
                     livello = aceService.getPersonaById(id).getLivello();
+
+                    // sovrascrittura campo email nel caso di utenti non strutturati
+                    // (campo ldap popolato con "nomail")
+                    token.setEmail(aceService.getUtente(username).getEmail());
                 } catch (Exception e) {
                     LOGGER.info("utente " + username + " spid non presente in ldap");
                 }
@@ -94,6 +99,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
         } catch (Exception e) {
             LOGGER.error(e);
         }
+
 
         token.getOtherClaims().put("username_cnr", username);
         token.getOtherClaims().put("livello", livello);
