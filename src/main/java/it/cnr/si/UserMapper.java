@@ -12,14 +12,16 @@ import org.keycloak.protocol.oidc.mappers.*;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.IDToken;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccessTokenMapper, OIDCIDTokenMapper, UserInfoTokenMapper {
 
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
+    public static final String DATA_CESSAZIONE = "data_cessazione";
+    public static final String USERNAME_CNR = "username_cnr";
+    public static final String LIVELLO = "livello";
+    public static final String MATRICOLA_CNR = "matricola_cnr";
+    public static final String IS_CNR_USER = "is_cnr_user";
 
     static {
         OIDCAttributeMapperHelper.addIncludeInTokensConfig(configProperties, FullNameMapper.class);
@@ -75,21 +77,26 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
                     username = aceService.getUtenteByCodiceFiscale(codiceFiscale).getUsername().toLowerCase();
                     isCnrUser = Boolean.TRUE;   // Utente cnr che entra con spid
                 } catch (Exception e) {
-                    LOGGER.info("utente " + username + " spid non presente in ldap");
+                    LOGGER.info("Utente " + username + " spid non presente in ldap");
                 }
             } else {
                 isCnrUser = Boolean.TRUE;       // Utente cnr che entra con credenziali cnr
             }
 
-            if(isCnrUser) {                     // Utente cnr che entra con credenziali cnr o spid
+            if(isCnrUser) { // Utente cnr che entra con credenziali cnr o spid
                 try {
                     Integer id = aceService.getPersonaByUsername(username).getId();
-                    matricola = Integer.toString(aceService.getPersonaById(id).getMatricola());
-                    livello = aceService.getPersonaById(id).getLivello();
+                    final PersonaWebDto personaById = aceService.getPersonaById(id);
+                    matricola = Integer.toString(personaById.getMatricola());
+                    livello = personaById.getLivello();
 
                     // sovrascrittura campo email nel caso di utenti non strutturati
                     // (campo ldap popolato con "nomail")
                     token.setEmail(aceService.getUtente(username).getEmail());
+                    Optional.ofNullable(personaById.getDataCessazione())
+                            .ifPresent(localDate -> {
+                                token.getOtherClaims().put(DATA_CESSAZIONE, localDate);
+                            });
                 } catch (Exception e) {
                     LOGGER.info("utente " + username + " spid non presente in ldap");
                 }
@@ -100,11 +107,10 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
             LOGGER.error(e);
         }
 
-
-        token.getOtherClaims().put("username_cnr", username);
-        token.getOtherClaims().put("livello", livello);
-        token.getOtherClaims().put("matricola_cnr", matricola);
-        token.getOtherClaims().put("is_cnr_user", isCnrUser);
+        token.getOtherClaims().put(USERNAME_CNR, username);
+        token.getOtherClaims().put(LIVELLO, livello);
+        token.getOtherClaims().put(MATRICOLA_CNR, matricola);
+        token.getOtherClaims().put(IS_CNR_USER, isCnrUser);
 
     }
 
