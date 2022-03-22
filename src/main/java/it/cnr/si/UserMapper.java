@@ -99,7 +99,9 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
                     // sovrascrittura campo email nel caso di utenti non strutturati
                     // (campo ldap popolato con "nomail")
                     // setting email
-                    userSession.getUser().getAttributes().put("email", Arrays.asList(aceService.getUtente(username).getEmail()));
+                    String email = aceService.getUtente(username).getEmail();
+                    token.setEmail(email);
+                    userSession.getUser().getAttributes().put("email", Arrays.asList(email));
                     Optional.ofNullable(personaById.getDataCessazione())
                             .ifPresent(localDate -> {
                                 token.getOtherClaims().put(DATA_CESSAZIONE, localDate);
