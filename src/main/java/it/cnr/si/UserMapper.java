@@ -78,7 +78,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
                     String codiceFiscale = username.substring(6).toUpperCase();
                     username = aceService.getUtenteByCodiceFiscale(codiceFiscale).getUsername().toLowerCase();
                     isCnrUser = Boolean.TRUE;   // Utente cnr che entra con spid
-                    LOGGER.info("Utente SPID" + username);
+                    LOGGER.info("Utente SPID " + username);
                 } catch (Exception e) {
                     LOGGER.info("Utente " + username + " spid non presente in ldap");
                 }
@@ -116,9 +116,10 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
                     String email = utente.getEmail();
                     token.setEmail(email);
                     userSession.getUser().getAttributes().put("email", Arrays.asList(email));
+                    LOGGER.info("inserita email: " + email + " nel token");
 
                 } catch (Exception e) {
-                        LOGGER.info("utente " + username + " spid non presente in ldap");
+                    LOGGER.info("Exception utente " + username + " spid non presente in ldap");
                 }
             }
             LOGGER.info(username);
@@ -131,6 +132,11 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
         token.getOtherClaims().put(LIVELLO, livello);
         token.getOtherClaims().put(MATRICOLA_CNR, matricola);
         token.getOtherClaims().put(IS_CNR_USER, isCnrUser);
+
+        LOGGER.info("inserito in OtherClaims: username: " + username);
+        LOGGER.info("inserito in OtherClaims: livello: " + livello);
+        LOGGER.info("inserito in OtherClaims: matricola: " + matricola);
+        LOGGER.info("inserito in OtherClaims: isCnrUser: " + isCnrUser);
 
     }
 
