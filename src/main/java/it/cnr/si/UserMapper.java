@@ -82,15 +82,18 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
                 }
             } else {
                 isCnrUser = Boolean.TRUE;       // Utente cnr che entra con credenziali cnr
-                LOGGER.info("Utente CNR" + username);
+                LOGGER.info("Utente CNR " + username);
             }
 
             if(isCnrUser) { // Utente cnr che entra con credenziali cnr o spid
-                LOGGER.info("Utente" + username + "riconosciuto come CNR");
+                LOGGER.info("Utente " + username + " riconosciuto come CNR");
                 try {
                     Integer id = aceService.getPersonaByUsername(username).getId();
                     final PersonaWebDto personaById = aceService.getPersonaById(id);
-                    matricola = Integer.toString(personaById.getMatricola());
+                    matricola = Optional.ofNullable(personaById.getMatricola())
+                            .map(String::valueOf)
+                            .orElse(null);
+
                     livello = personaById.getLivello();
 
                     // sovrascrittura campo email nel caso di utenti non strutturati
