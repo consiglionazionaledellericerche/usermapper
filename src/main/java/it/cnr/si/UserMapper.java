@@ -2,6 +2,8 @@ package it.cnr.si;
 
 import it.cnr.si.service.AceService;
 import it.cnr.si.service.dto.anagrafica.letture.PersonaWebDto;
+import it.cnr.si.service.dto.anagrafica.simpleweb.SimplePersonaWebDto;
+import it.cnr.si.service.dto.anagrafica.simpleweb.SimpleUtenteWebDto;
 import org.jboss.logging.Logger;
 import org.keycloak.models.ClientSessionContext;
 import org.keycloak.models.KeycloakSession;
@@ -88,26 +90,35 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
             if(isCnrUser) { // Utente cnr che entra con credenziali cnr o spid
                 LOGGER.info("Utente " + username + " riconosciuto come CNR");
                 try {
-                    Integer id = aceService.getPersonaByUsername(username).getId();
-                    final PersonaWebDto personaById = aceService.getPersonaById(id);
-                    matricola = Optional.ofNullable(personaById.getMatricola())
-                            .map(String::valueOf)
-                            .orElse(null);
 
-                    livello = personaById.getLivello();
+                    SimpleUtenteWebDto utente = aceService.getUtente(username);
+
+                    Optional<SimplePersonaWebDto> maybePersona =
+                            Optional.ofNullable(utente.getPersona());
+
+                    if(maybePersona.isPresent()) {
+                        final PersonaWebDto personaById = aceService.getPersonaById(maybePersona.get().getId());
+                        matricola = Optional.ofNullable(personaById.getMatricola())
+                                .map(String::valueOf)
+                                .orElse(null);
+
+                        livello = personaById.getLivello();
+
+                        Optional.ofNullable(personaById.getDataCessazione())
+                                .ifPresent(localDate -> {
+                                    token.getOtherClaims().put(DATA_CESSAZIONE, localDate);
+                                });
+                    }
 
                     // sovrascrittura campo email nel caso di utenti non strutturati
                     // (campo ldap popolato con "nomail")
                     // setting email
-                    String email = aceService.getUtente(username).getEmail();
+                    String email = utente.getEmail();
                     token.setEmail(email);
                     userSession.getUser().getAttributes().put("email", Arrays.asList(email));
-                    Optional.ofNullable(personaById.getDataCessazione())
-                            .ifPresent(localDate -> {
-                                token.getOtherClaims().put(DATA_CESSAZIONE, localDate);
-                            });
+
                 } catch (Exception e) {
-                    LOGGER.info("utente " + username + " spid non presente in ldap");
+                        LOGGER.info("utente " + username + " spid non presente in ldap");
                 }
             }
             LOGGER.info(username);
