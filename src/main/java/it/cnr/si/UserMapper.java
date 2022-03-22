@@ -76,14 +76,17 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
                     String codiceFiscale = username.substring(6).toUpperCase();
                     username = aceService.getUtenteByCodiceFiscale(codiceFiscale).getUsername().toLowerCase();
                     isCnrUser = Boolean.TRUE;   // Utente cnr che entra con spid
+                    LOGGER.info("Utente SPID" + username);
                 } catch (Exception e) {
                     LOGGER.info("Utente " + username + " spid non presente in ldap");
                 }
             } else {
                 isCnrUser = Boolean.TRUE;       // Utente cnr che entra con credenziali cnr
+                LOGGER.info("Utente CNR" + username);
             }
 
             if(isCnrUser) { // Utente cnr che entra con credenziali cnr o spid
+                LOGGER.info("Utente" + username + "riconosciuto come CNR");
                 try {
                     Integer id = aceService.getPersonaByUsername(username).getId();
                     final PersonaWebDto personaById = aceService.getPersonaById(id);
@@ -92,7 +95,8 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
 
                     // sovrascrittura campo email nel caso di utenti non strutturati
                     // (campo ldap popolato con "nomail")
-                    token.setEmail(aceService.getUtente(username).getEmail());
+                    // setting email
+                    userSession.getUser().getAttributes().put("email", Arrays.asList(aceService.getUtente(username).getEmail()));
                     Optional.ofNullable(personaById.getDataCessazione())
                             .ifPresent(localDate -> {
                                 token.getOtherClaims().put(DATA_CESSAZIONE, localDate);
