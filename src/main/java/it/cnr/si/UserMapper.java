@@ -23,6 +23,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
     public static final String USERNAME_CNR = "username_cnr";
     public static final String LIVELLO = "livello";
     public static final String MATRICOLA_CNR = "matricola_cnr";
+    public static final String EMAIL_CNR = "email_cnr";
     public static final String IS_CNR_USER = "is_cnr_user";
 
     static {
@@ -68,6 +69,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
         String username = userSession.getUser().getUsername().toLowerCase();
         String matricola = null;
         String livello = null;
+        String email = null;
         Boolean isCnrUser = Boolean.FALSE;
 
         try {
@@ -113,11 +115,12 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
                     // sovrascrittura campo email nel caso di utenti non strutturati
                     // (campo ldap popolato con "nomail")
                     // setting email
-                    String email = utente.getEmail();
-                    token.setEmail(email);
-                    userSession.getUser().getAttributes().put("email", Arrays.asList(email));
-                    LOGGER.info("inserita email: " + email + " nel token");
-
+                    email = utente.getEmail();
+                    if (!isSpidUsername(username)) {
+                        token.setEmail(email);
+                        userSession.getUser().getAttributes().put("email", Arrays.asList(email));
+                        LOGGER.info("inserita email: " + email + " nel token");
+                    }
                 } catch (Exception e) {
                     LOGGER.info("Exception utente " + username + " spid non presente in ldap");
                 }
@@ -132,11 +135,13 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
         token.getOtherClaims().put(LIVELLO, livello);
         token.getOtherClaims().put(MATRICOLA_CNR, matricola);
         token.getOtherClaims().put(IS_CNR_USER, isCnrUser);
+        token.getOtherClaims().put(EMAIL_CNR, email);
 
         LOGGER.info("inserito in OtherClaims: username: " + username);
         LOGGER.info("inserito in OtherClaims: livello: " + livello);
         LOGGER.info("inserito in OtherClaims: matricola: " + matricola);
         LOGGER.info("inserito in OtherClaims: isCnrUser: " + isCnrUser);
+        LOGGER.info("inserito in OtherClaims: email_cnr: " + email);
 
     }
 
