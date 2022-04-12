@@ -25,6 +25,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
     public static final String MATRICOLA_CNR = "matricola_cnr";
     public static final String EMAIL_CNR = "email_cnr";
     public static final String IS_CNR_USER = "is_cnr_user";
+    public static final String DATAULTIMOCAMBIOPW = "dataultimocambiopw";
 
     static {
         OIDCAttributeMapperHelper.addIncludeInTokensConfig(configProperties, FullNameMapper.class);
@@ -136,13 +137,17 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
         token.getOtherClaims().put(MATRICOLA_CNR, matricola);
         token.getOtherClaims().put(IS_CNR_USER, isCnrUser);
         token.getOtherClaims().put(EMAIL_CNR, email);
-
-        LOGGER.info("inserito in OtherClaims: username: " + username);
-        LOGGER.info("inserito in OtherClaims: livello: " + livello);
-        LOGGER.info("inserito in OtherClaims: matricola: " + matricola);
-        LOGGER.info("inserito in OtherClaims: isCnrUser: " + isCnrUser);
-        LOGGER.info("inserito in OtherClaims: email_cnr: " + email);
-
+        token.getOtherClaims().put(DATAULTIMOCAMBIOPW,
+                Optional.ofNullable(userSession)
+                        .flatMap(userSessionModel -> Optional.ofNullable(userSession.getUser()))
+                        .flatMap(userModel -> Optional.ofNullable(userModel.getAttributes().get(DATAULTIMOCAMBIOPW)))
+                        .map(strings -> strings.stream().findAny().get())
+                        .orElse(null)
+        );
+        token.getOtherClaims()
+                .entrySet()
+                .stream()
+                .forEach(stringObjectEntry -> LOGGER.info("OtherClaims :: " + stringObjectEntry.getKey() + " -> " + stringObjectEntry.getValue()));
     }
 
     private boolean isSpidUsername(String username) {
