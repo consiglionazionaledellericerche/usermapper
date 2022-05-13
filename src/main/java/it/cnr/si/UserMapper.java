@@ -12,6 +12,7 @@ import org.keycloak.models.UserSessionModel;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.protocol.oidc.mappers.*;
 import org.keycloak.provider.ProviderConfigProperty;
+import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.IDToken;
 
 import java.util.*;
@@ -165,6 +166,17 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
         if (userInfo) config.put(OIDCAttributeMapperHelper.INCLUDE_IN_USERINFO, "true");
         mapper.setConfig(config);
         return mapper;
+    }
+
+    @Override
+    public AccessToken transformUserInfoToken(AccessToken token, ProtocolMapperModel mappingModel, KeycloakSession session, UserSessionModel userSession, ClientSessionContext clientSessionCtx) {
+        AccessToken accessToken = super.transformUserInfoToken(token, mappingModel, session, userSession, clientSessionCtx);
+        String username = userSession.getUser().getUsername();
+        if (!isSpidUsername(username)) {
+            accessToken.getOtherClaims().put("userInfo", aceService.getUserInfoDto(username));
+            accessToken.getOtherClaims().put("groups", Collections.singleton("CNR"));
+        }
+        return accessToken;
     }
 
 }
