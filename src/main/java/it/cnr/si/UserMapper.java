@@ -25,6 +25,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
     public static final String LIVELLO = "livello";
     public static final String MATRICOLA_CNR = "matricola_cnr";
     public static final String EMAIL_CNR = "email_cnr";
+    public static final String CODICE_FISCALE = "codice_fiscale";
     public static final String IS_CNR_USER = "is_cnr_user";
     public static final String DATAULTIMOCAMBIOPW = "dataultimocambiopw";
 
@@ -72,6 +73,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
         String matricola = null;
         String livello = null;
         String email = null;
+        String codiceFiscale = null;
         Boolean isCnrUser = Boolean.FALSE;
 
         try {
@@ -79,7 +81,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
             // spid auth
             if(isSpidUsername(username)) {
                 try {
-                    String codiceFiscale = username.substring(6).toUpperCase();
+                    codiceFiscale = username.substring(6).toUpperCase();
                     username = aceService.getUtenteByCodiceFiscale(codiceFiscale).getUsername().toLowerCase();
                     isCnrUser = Boolean.TRUE;   // Utente cnr che entra con spid
                     LOGGER.info("Utente SPID " + username);
@@ -102,6 +104,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
 
                     if(maybePersona.isPresent()) {
                         final PersonaWebDto personaById = aceService.getPersonaById(maybePersona.get().getId());
+                        codiceFiscale = personaById.getCodiceFiscale();
                         matricola = Optional.ofNullable(personaById.getMatricola())
                                 .map(String::valueOf)
                                 .orElse(null);
@@ -138,6 +141,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
         token.getOtherClaims().put(MATRICOLA_CNR, matricola);
         token.getOtherClaims().put(IS_CNR_USER, isCnrUser);
         token.getOtherClaims().put(EMAIL_CNR, email);
+        token.getOtherClaims().put(CODICE_FISCALE, codiceFiscale);
         token.getOtherClaims().put(DATAULTIMOCAMBIOPW,
                 Optional.ofNullable(userSession)
                         .flatMap(userSessionModel -> Optional.ofNullable(userSession.getUser()))
