@@ -175,7 +175,10 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
     @Override
     public AccessToken transformUserInfoToken(AccessToken token, ProtocolMapperModel mappingModel, KeycloakSession session, UserSessionModel userSession, ClientSessionContext clientSessionCtx) {
         AccessToken accessToken = super.transformUserInfoToken(token, mappingModel, session, userSession, clientSessionCtx);
-        String username = userSession.getUser().getUsername();
+        String username = Optional.ofNullable(accessToken.getOtherClaims().get(USERNAME_CNR))
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .orElse(userSession.getUser().getUsername());
         if (!isSpidUsername(username)) {
             accessToken.getOtherClaims().put("userInfo", aceService.getUserInfoDto(username));
             accessToken.getOtherClaims().put("groups", Collections.singleton("CNR"));
