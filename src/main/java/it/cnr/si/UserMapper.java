@@ -1,7 +1,7 @@
 package it.cnr.si;
 
 import it.cnr.si.service.AceService;
-import it.cnr.si.service.dto.anagrafica.letture.PersonaWebDto;
+import it.cnr.si.service.dto.anagrafica.UserInfoDto;
 import it.cnr.si.service.dto.anagrafica.simpleweb.SimplePersonaWebDto;
 import it.cnr.si.service.dto.anagrafica.simpleweb.SimpleUtenteWebDto;
 import org.jboss.logging.Logger;
@@ -28,6 +28,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
     public static final String CODICE_FISCALE = "codice_fiscale";
     public static final String IS_CNR_USER = "is_cnr_user";
     public static final String DATAULTIMOCAMBIOPW = "dataultimocambiopw";
+    public static final String CNR = "CNR";
 
     static {
         OIDCAttributeMapperHelper.addIncludeInTokensConfig(configProperties, FullNameMapper.class);
@@ -179,8 +180,11 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
                 .map(String.class::cast)
                 .orElse(userSession.getUser().getUsername());
         if (!isSpidUsername(username)) {
-            accessToken.getOtherClaims().put("userInfo", aceService.getUserInfoDto(username));
-            accessToken.getOtherClaims().put("groups", Collections.singleton("CNR"));
+            LOGGER.info("User Info for: " + username);
+            final UserInfoDto userInfoDto = aceService.getUserInfoDto(username);
+            accessToken.getOtherClaims().put("userInfo", userInfoDto);
+            LOGGER.info("User Info value: " + userInfoDto);
+            accessToken.getOtherClaims().put("groups", new ArrayList<String>(Arrays.asList(CNR)));
         }
         return accessToken;
     }
