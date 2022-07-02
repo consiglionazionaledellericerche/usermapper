@@ -103,15 +103,14 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
                             Optional.ofNullable(utente.getPersona());
 
                     if(maybePersona.isPresent()) {
-                        final PersonaWebDto personaById = aceService.getPersonaById(maybePersona.get().getId());
-                        codiceFiscale = personaById.getCodiceFiscale();
-                        matricola = Optional.ofNullable(personaById.getMatricola())
+                        codiceFiscale = maybePersona.get().getCodiceFiscale();
+                        matricola = Optional.ofNullable(maybePersona.get().getMatricola())
                                 .map(String::valueOf)
                                 .orElse(null);
 
-                        livello = personaById.getLivello();
+                        livello = maybePersona.get().getLivello();
 
-                        Optional.ofNullable(personaById.getDataCessazione())
+                        Optional.ofNullable(maybePersona.get().getDataCessazione())
                                 .ifPresent(localDate -> {
                                     token.getOtherClaims().put(DATA_CESSAZIONE, localDate);
                                 });
