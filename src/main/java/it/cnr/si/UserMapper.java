@@ -2,6 +2,7 @@ package it.cnr.si;
 
 import it.cnr.si.service.AceService;
 import it.cnr.si.service.dto.anagrafica.UserInfoDto;
+import it.cnr.si.service.dto.anagrafica.scritture.UtenteDto;
 import it.cnr.si.service.dto.anagrafica.simpleweb.SimplePersonaWebDto;
 import it.cnr.si.service.dto.anagrafica.simpleweb.SimpleUtenteWebDto;
 import org.jboss.logging.Logger;
@@ -83,9 +84,12 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
             if(isSpidUsername(username)) {
                 try {
                     codiceFiscale = username.substring(6).toUpperCase();
-                    username = aceService.getUtenteByCodiceFiscale(codiceFiscale).getUsername().toLowerCase();
-                    isCnrUser = Boolean.TRUE;   // Utente cnr che entra con spid
-                    LOGGER.info("Utente SPID " + username);
+                    final Optional<UtenteDto> utenteByCodiceFiscale = aceService.getUtenteByCodiceFiscale(codiceFiscale);
+                    if (utenteByCodiceFiscale.isPresent()) {
+                        username = utenteByCodiceFiscale.get().getUsername().toLowerCase();
+                        isCnrUser = Boolean.TRUE;   // Utente cnr che entra con spid
+                        LOGGER.info("Utente SPID " + username);
+                    }
                 } catch (Exception e) {
                     LOGGER.info("Utente " + username + " spid non presente in ldap");
                 }
