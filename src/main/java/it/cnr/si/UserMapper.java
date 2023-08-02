@@ -183,7 +183,15 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
                 .filter(String.class::isInstance)
                 .map(String.class::cast)
                 .orElse(userSession.getUser().getUsername());
-        if (!isSpidUsername(username)) {
+        if (!isSpidUsername(username) &&
+                mappingModel.getConfig()
+                        .entrySet()
+                        .stream()
+                        .filter(stringStringEntry -> stringStringEntry.getKey().equalsIgnoreCase("userinfo.token.claim"))
+                        .findAny()
+                        .filter(stringStringEntry -> Boolean.valueOf(stringStringEntry.getValue()))
+                        .isPresent()
+        ) {
             LOGGER.info("User Info for: " + username);
             final UserInfoDto userInfoDto = aceService.getUserInfoDto(username);
             accessToken.getOtherClaims().put("userInfo", userInfoDto);
