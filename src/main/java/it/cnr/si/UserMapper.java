@@ -41,7 +41,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
 
     private static final Logger LOGGER = Logger.getLogger(UserMapper.class);
 
-    private AceService aceService = new AceService();
+    private AceService aceService;
 
     public List<ProviderConfigProperty> getConfigProperties() {
         return configProperties;
@@ -69,7 +69,9 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
 
     protected void setClaim(IDToken token, ProtocolMapperModel mappingModel, UserSessionModel userSession,
                             KeycloakSession keycloakSession, ClientSessionContext clientSessionCtx) {
-
+        if (aceService == null) {
+            aceService = new AceService();
+        }
         // ldap or spid username
         String username = userSession.getUser().getUsername().toLowerCase();
         String matricola = null;
