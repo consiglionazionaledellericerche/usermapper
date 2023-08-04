@@ -133,7 +133,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
                         LOGGER.info("inserita email: " + email + " nel token");
                     }
                 } catch (Exception e) {
-                    LOGGER.info("Exception utente " + username + " spid non presente in ldap");
+                    LOGGER.warn("Utente " + username + " non presente in ACE", e);
                 }
             }
             LOGGER.info(username);
