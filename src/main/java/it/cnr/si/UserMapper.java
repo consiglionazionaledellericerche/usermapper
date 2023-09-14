@@ -23,6 +23,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
     public static final String DATA_CESSAZIONE = "data_cessazione";
     public static final String USERNAME_CNR = "username_cnr";
+    public static final String TELEPHONENUMBER = "telephonenumber";
     public static final String LIVELLO = "livello";
     public static final String MATRICOLA_CNR = "matricola_cnr";
     public static final String EMAIL_CNR = "email_cnr";
@@ -196,6 +197,12 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
         ) {
             LOGGER.info("User Info for: " + username);
             final UserInfoDto userInfoDto = aceService.getUserInfoDto(username);
+            Optional.ofNullable(userSession)
+                    .flatMap(userSessionModel -> Optional.ofNullable(userSession.getUser()))
+                    .flatMap(userModel -> Optional.ofNullable(userModel.getFirstAttribute(TELEPHONENUMBER)))
+                    .ifPresent(s -> {
+                        userInfoDto.setTelefono_comunicazioni(s);
+                    });
             accessToken.getOtherClaims().put("userInfo", userInfoDto);
             LOGGER.info("User Info value: " + userInfoDto);
             accessToken.getOtherClaims().put("groups", new ArrayList<String>(Arrays.asList(CNR)));
