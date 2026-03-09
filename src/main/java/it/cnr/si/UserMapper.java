@@ -80,7 +80,9 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
         String matricola = null;
         String livello = null;
         String email = null;
-        String emailOriginal = userSession.getUser().getEmail();
+        String emailOriginal = Optional.ofNullable(userSession.getUser().getAttributes().get("email"))
+                .flatMap(list -> list.stream().findFirst())
+                .orElse(userSession.getUser().getEmail());
         String codiceFiscale = null;
         Boolean isCnrUser = Boolean.FALSE;
 
