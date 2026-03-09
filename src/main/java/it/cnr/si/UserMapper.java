@@ -28,6 +28,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
     public static final String LIVELLO = "livello";
     public static final String MATRICOLA_CNR = "matricola_cnr";
     public static final String EMAIL_CNR = "email_cnr";
+    public static final String EMAIL_ORIGINAL = "email_original";
     public static final String CODICE_FISCALE = "codice_fiscale";
     public static final String IS_CNR_USER = "is_cnr_user";
     public static final String DATAULTIMOCAMBIOPW = "dataultimocambiopw";
@@ -79,6 +80,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
         String matricola = null;
         String livello = null;
         String email = null;
+        String emailOriginal = token.getEmail();
         String codiceFiscale = null;
         Boolean isCnrUser = Boolean.FALSE;
 
@@ -149,6 +151,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
         token.getOtherClaims().put(MATRICOLA_CNR, matricola);
         token.getOtherClaims().put(IS_CNR_USER, isCnrUser);
         token.getOtherClaims().put(EMAIL_CNR, email);
+        token.getOtherClaims().put(EMAIL_ORIGINAL, emailOriginal);
         token.getOtherClaims().put(CODICE_FISCALE, codiceFiscale);
         token.getOtherClaims().put(DATAULTIMOCAMBIOPW,
                 Optional.ofNullable(userSession)
