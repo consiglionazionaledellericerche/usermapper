@@ -83,6 +83,7 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
         String emailOriginal = Optional.ofNullable(userSession.getUser().getAttributes().get("email"))
                 .flatMap(list -> list.stream().findFirst())
                 .orElse(userSession.getUser().getEmail());
+        LOGGER.info("Recuperata email originale: " + emailOriginal);
         String codiceFiscale = null;
         Boolean isCnrUser = Boolean.FALSE;
 
