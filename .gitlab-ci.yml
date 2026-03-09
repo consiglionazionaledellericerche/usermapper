@@ -27,7 +27,7 @@ release_artifact:
   only:
     - master
   script:
-    - git checkout -B "$CI_BUILD_REF_NAME"
+    - git checkout -B "$CI_COMMIT_REF_NAME"
     # mi metto in condizione del push per l'utente con la deploy key
     - git remote set-url --push origin git@git.si.cnr.it:$CI_PROJECT_PATH
     - mvn $MAVEN_CLI_OPTS -Dresume=false release:prepare release:perform -Pprod -DpushChanges=false -DlocalCheckout=true
