@@ -136,7 +136,6 @@ public class UserMapper extends AbstractOIDCProtocolMapper implements OIDCAccess
                     email = utente.getEmail();
                     if (!isSpidUsername(username)) {
                         token.setEmail(email);
-                        userSession.getUser().getAttributes().put("email", Arrays.asList(email));
                         LOGGER.info("inserita email: " + email + " nel token");
                     }
                 } catch (Exception e) {
